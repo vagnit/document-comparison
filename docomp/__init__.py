@@ -19,8 +19,4 @@ from . import extraction
 from . import comparison
 from ._version import __version__
 
-__all__ = [
-    'extraction',
-    'comparison',
-    '__version__'
-]
+__all__ = ['extraction', 'comparison', '__version__']
