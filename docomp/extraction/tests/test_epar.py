@@ -13,7 +13,8 @@ def test_raise_error_wrong_product(product):
     if not isinstance(product, str):
         with pytest.raises(
             TypeError,
-            match=f'Parameter `product` should be a string. Got {type(product)} instead.',
+            match=f'Parameter `product` should be a string. '
+            f'Got {type(product)} instead.',
         ):
             convert_to_dict(product)
     else:
@@ -27,7 +28,8 @@ def test_raise_error_wrong_language(language):
     if not isinstance(language, str):
         with pytest.raises(
             TypeError,
-            match=f'Parameter `language` should be a string. Got {type(language)} instead.',
+            match=f'Parameter `language` should be a string. '
+            f'Got {type(language)} instead.',
         ):
             convert_to_dict('Evicto', language)
     else:
@@ -35,13 +37,15 @@ def test_raise_error_wrong_language(language):
             convert_to_dict('Evicto', language)
 
 
-@pytest.mark.parametrize('product,language', [('Fareston', 'en')])
+@pytest.mark.parametrize('product,language', [('Azarga', 'en'), ('Evista', 'en')])
 def test_extract_labelling_content(product, language):
     """Test the extraction of labelling content."""
     doc_dict = convert_to_dict(product, language)
+    assert isinstance(doc_dict, dict)
 
 
-@pytest.mark.parametrize('product,language', [('Zutectra', 'fr')])
+@pytest.mark.parametrize('product,language', [('Azarga', 'en'), ('Evista', 'en')])
 def test_extract_leaflet_content(product, language):
     """Test the extraction of labelling content."""
     doc_dict = convert_to_dict(product, language)
+    assert isinstance(doc_dict, dict)

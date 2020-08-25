@@ -12,7 +12,7 @@ from re import sub
 import pandas as pd
 from bs4 import BeautifulSoup
 from pdfminer.high_level import extract_pages
-from pdfminer.layout import LTTextContainer, LTImage, LTFigure, LAParams
+from pdfminer.layout import LTTextContainer, LTFigure, LAParams
 
 BASE_URL = 'https://www.ema.europa.eu/'
 REPORT_URL = urljoin(
@@ -42,7 +42,8 @@ def _extract_product_url(product):
     products = data['Medicine name'].unique()
     if product not in products:
         raise ValueError(
-            f'Parameter `product` should be one of {", ".join(products)}.\n\nInstead {product} was given.'
+            f'Parameter `product` should be one of {", ".join(products)}.\n\n'
+            f'Instead {product} was given.'
         )
 
     # Extract product url
@@ -83,7 +84,8 @@ def _extract_product_language_url(product, language):
     languages = urls.keys()
     if language not in languages:
         raise ValueError(
-            f'Parameter `language` should be one of {", ".join(languages)}.\n\nInstead {language} was given.'
+            f'Parameter `language` should be one of {", ".join(languages)}.\n\n'
+            f'Instead {language} was given.'
         )
 
     return urls[language]
@@ -142,7 +144,7 @@ def _extract_labelling_content(labelling_pages):
     return content
 
 
-def _extract_leaflet_to_content(leaflet_pages):
+def _extract_leaflet_content(leaflet_pages):
     """Extract content from the leaflet section of EPAR document."""
 
     content = {'text': [], 'images': []}
@@ -181,13 +183,13 @@ def convert_to_dict(product, language='en'):
 
     # Identify sections
     labelling_num, leaflet_num = _identify_sections(pages)
-    labelling_pages = pages[(labelling_num + 1) : leaflet_num]
-    leafleat_pages = pages[(leaflet_num + 1) :]
+    labelling_pages = pages[(labelling_num + 1): leaflet_num]
+    leafleat_pages = pages[(leaflet_num + 1):]
 
     # Extract content
     doc_dict = {
         'labelling': _extract_labelling_content(labelling_pages),
-        'leafleat': _extract_leaflet_to_content(leafleat_pages),
+        'leafleat': _extract_leaflet_content(leafleat_pages),
     }
 
     return doc_dict
