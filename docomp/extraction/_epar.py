@@ -131,7 +131,7 @@ def _extract_labelling_content(labelling_pages):
 
             if isinstance(element, LTTextContainer):
 
-                # # Iterate through lines of elements
+                # Iterate through lines of elements
                 for text_line in element:
                     text = sub(r'\d.\s', '', text_line.get_text().splitlines()[0])
                     if not text.isnumeric():
@@ -170,7 +170,7 @@ def _extract_leaflet_content(leaflet_pages):
     return content
 
 
-def convert_to_dict(product, language='en'):
+def convert_epar_to_dict(product, language='en'):
     """Convert the EPAR document to a dictionary representation."""
 
     # Fetch pdf
