@@ -7,7 +7,7 @@ data from it.
 
 from urllib.parse import urlparse, urljoin
 from urllib.request import urlopen, urlretrieve
-from re import sub
+from re import match
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -19,6 +19,8 @@ REPORT_URL = urljoin(
     BASE_URL,
     'sites/default/files/Medicines_output_european_public_assessment_reports.xlsx',
 )
+MIN_LENGTH = 5
+MIN_UPPER_RATIO = 0.7
 
 
 def _extract_product_url(product):
@@ -118,56 +120,90 @@ def _identify_sections(pages):
     return [sections[0], sections[-1]]
 
 
-def _extract_labelling_content(labelling_pages):
-    """Extract content from the labelling section of EPAR document."""
+class HTMLExtractor:
+    """Class to extract HTML from pdf pages."""
 
-    content = {'text': [], 'images': []}
+    def __init__(self, pages):
+        self.pages = pages
 
-    # Iterate through pages
-    for page in labelling_pages:
+    def _extract_elements(self):
+        """Extract HTML elements."""
+        self.html_ = []
 
-        # Iterate through page elements
-        for element in page:
+        # Iterate through pages
+        for page in self.pages:
 
-            if isinstance(element, LTTextContainer):
+            # Iterate through page elements
+            for element in page:
 
-                # Iterate through lines of elements
-                for text_line in element:
-                    text = sub(r'\d.\s', '', text_line.get_text().splitlines()[0])
-                    if not text.isnumeric():
-                        content['text'].append(text)
+                if isinstance(element, LTTextContainer):
 
-            elif isinstance(element, LTFigure):
-                for img in element:
-                    content['images'].append(img.stream.get_data())
+                    # Iterate through lines of elements
+                    for text_line in element:
+                        text = ' '.join(text_line.get_text().split())
+                        if text and not text.isdigit():
+                            length = sum(1 for char in text if char.isupper())
+                            upper_ratio = length / len(''.join(text.split()))
+                            if (
+                                text.isupper() and length >= MIN_LENGTH
+                            ) or upper_ratio > MIN_UPPER_RATIO:
+                                html_element = f'<p><b>{text}</b></p>'
+                            else:
+                                html_element = f'<p>{text}</p>'
+                            self.html_.append(html_element)
 
-    return content
+        return self
+
+    def _modify_elements(self):
+        """Modify extracted HTML elements."""
+        html = self.html_[0:1]
+        for prev_element, element, next_element in list(
+            zip(self.html_[0:-2], self.html_[1:-1], self.html_[2:])
+        ):
+            prev_match = match(
+                r'\d+.', prev_element.replace('<p><b>', '').replace('</b></p>', '')
+            )
+            next_match = match(
+                r'\d+.', next_element.replace('<p><b>', '').replace('</b></p>', '')
+            )
+            if (
+                prev_match
+                and next_match
+                and int(next_match.group()[:-1]) - int(prev_match.group()[:-1]) == 1
+            ):
+                element = element.replace('<b>', '').replace('</b>', '')
+            html.append(element)
+        self.html_ = html + [next_element]
+        return self
+
+    def apply(self):
+        """Apply the HTML extraction."""
+        self._extract_elements()._modify_elements()
+        self.html_ = ''.join(self.html_)
+        return self
 
 
-def _extract_leaflet_content(leaflet_pages):
-    """Extract content from the leaflet section of EPAR document."""
+class ImagesExtractor:
+    """Class to extract images from pdf pages."""
 
-    content = {'text': [], 'images': []}
+    def __init__(self, pages):
+        self.pages = pages
 
-    # Iterate through pages
-    for page in leaflet_pages:
+    def apply(self):
 
-        # Iterate through page elements
-        for element in page:
+        self.images_ = []
 
-            if isinstance(element, LTTextContainer):
+        # Iterate through pages
+        for page in self.pages:
 
-                # # Iterate through lines of elements
-                for text_line in element:
-                    text = sub(r'\d.\s', '', text_line.get_text().splitlines()[0])
-                    if not text.isnumeric():
-                        content['text'].append(text)
+            # Iterate through page elements
+            for element in page:
 
-            elif isinstance(element, LTFigure):
-                for img in element:
-                    content['images'].append(img.stream.get_data())
+                if isinstance(element, LTFigure):
+                    for img in element:
+                        self.images_.append(img.stream.get_data())
 
-    return content
+        return self
 
 
 def convert_epar_to_dict(product, language='en'):
@@ -178,7 +214,7 @@ def convert_epar_to_dict(product, language='en'):
 
     # Extract pdf pages
     pages = list(
-        extract_pages(path, laparams=LAParams(boxes_flow=None, char_margin=5.0))
+        extract_pages(path, laparams=LAParams(boxes_flow=None, char_margin=10.0))
     )
 
     # Identify sections
@@ -188,8 +224,14 @@ def convert_epar_to_dict(product, language='en'):
 
     # Extract content
     doc_dict = {
-        'labelling': _extract_labelling_content(labelling_pages),
-        'leafleat': _extract_leaflet_content(leafleat_pages),
+        'labelling': {
+            'html': HTMLExtractor(labelling_pages).apply(),
+            'images': ImagesExtractor(labelling_pages).apply(),
+        },
+        'leafleat': {
+            'html': HTMLExtractor(leafleat_pages).apply(),
+            'images': ImagesExtractor(leafleat_pages).apply(),
+        },
     }
 
     return doc_dict

@@ -4,7 +4,7 @@ the company's leaflet and label
 """
 
 # Author: Evangelos Nittis <vagos333@gmail.com>
-# Author: Georgios Douzas <gdouzas@icloud.com>
+#         Georgios Douzas <gdouzas@icloud.com>
 
 from re import sub
 
@@ -64,9 +64,7 @@ def convert_to_dict_comp(path):
     to a dictionary representation."""
 
     # Extract pdf pages
-    leafleat_pages = list(
-        extract_pages(path, laparams=LAParams(line_margin=5.0))
-    )
+    leafleat_pages = list(extract_pages(path, laparams=LAParams(line_margin=5.0)))
 
     # Extract content
     doc_dict_comp = {
