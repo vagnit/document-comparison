@@ -1,0 +1,19 @@
+extraction:
+
+    epar:
+
+        base_url: https://www.ema.europa.eu/
+
+        epar_downloader: 
+
+            report_url: sites/default/files/Medicines_output_european_public_assessment_reports.xlsx
+            product_url: /documents/product-information/{}-epar-product-information        
+            skiprows: 8
+            usecols: B,H,AD
+            boxes_flow: null
+            char_margin: 10.0
+
+        labelling_html_extractor:
+
+            min_length: 5
+            min_upper_case_ratio: 0.7

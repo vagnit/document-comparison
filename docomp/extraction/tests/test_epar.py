@@ -6,7 +6,7 @@ from os.path import join
 
 import pytest
 
-from docomp.extraction._epar import convert_epar_to_dict
+from docomp.extraction._epar import extract_epar_content
 
 EPAR_RESOURCES_PATH = join(
     'docomp', 'extraction', 'tests', 'resources', 'epar', '{}_{}.pdf'
@@ -36,10 +36,10 @@ def test_raise_error_wrong_product(product, monkeypatch):
             match=f'Parameter `product` should be a string. '
             f'Got {type(product)} instead.',
         ):
-            convert_epar_to_dict(product)
+            extract_epar_content(product)
     else:
         with pytest.raises(ValueError, match='Instead Test was given.$'):
-            convert_epar_to_dict(product)
+            extract_epar_content(product)
 
 
 @pytest.mark.parametrize('language', ['test', None])
@@ -66,10 +66,10 @@ def test_raise_error_wrong_language(language, monkeypatch):
             match=f'Parameter `language` should be a string. '
             f'Got {type(language)} instead.',
         ):
-            convert_epar_to_dict('Evicto', language)
+            extract_epar_content('Evicto', language)
     else:
         with pytest.raises(ValueError, match='Instead test was given.$'):
-            convert_epar_to_dict('Evicto', language)
+            extract_epar_content('Evicto', language)
 
 
 @pytest.mark.parametrize('product,language', [('Azarga', 'en'), ('Evista', 'en')])
@@ -83,7 +83,7 @@ def test_extract_labelling_content(product, language, monkeypatch):
     )
     monkeypatch.setattr('docomp.extraction._epar.urlretrieve', lambda url: (url, None))
 
-    doc_dict = convert_epar_to_dict(product, language)
+    doc_dict = extract_epar_content(product, language)
     assert isinstance(doc_dict, dict)
 
 
@@ -98,5 +98,5 @@ def test_extract_leaflet_content(product, language, monkeypatch):
     )
     monkeypatch.setattr('docomp.extraction._epar.urlretrieve', lambda url: (url, None))
 
-    doc_dict = convert_epar_to_dict(product, language)
+    doc_dict = extract_epar_content(product, language)
     assert isinstance(doc_dict, dict)

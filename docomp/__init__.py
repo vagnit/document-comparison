@@ -15,8 +15,12 @@ comparison
     Module which provides the functions to compare the leaflet and labelling documents.
 """
 
+import confuse
+
 from . import extraction
 from . import comparison
 from ._version import __version__
 
 __all__ = ['extraction', 'comparison', '__version__']
+
+CONFIG = confuse.Configuration('document-comparison', __name__)
