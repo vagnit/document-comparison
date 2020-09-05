@@ -12,7 +12,7 @@ test-coverage:
 	rm -rf coverage .coverage
 	pytest --cov=docomp docomp
 
-test: test-coverage test-doc
+test: test-coverage
 
 code-format:
 	black -S docomp

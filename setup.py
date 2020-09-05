@@ -17,7 +17,7 @@ with codecs.open('README.rst', encoding='utf-8-sig') as f:
 URL = 'https://github.com/georgedouzas/document-comparison.git'
 DOWNLOAD_URL = 'https://github.com/georgedouzas/document-comparison.git'
 VERSION = __version__
-INSTALL_REQUIRES = ['pandas>=1.1.0', 'xlrd>=1.0.0', 'beautifulsoup4>=4.9.1', 'pdfminer.six>=20200726']
+INSTALL_REQUIRES = ['pandas>=1.1.0', 'xlrd>=1.0.0', 'beautifulsoup4>=4.9.1', 'pdfminer.six>=20200726', 'confuse>=1.3.0']
 CLASSIFIERS = ['Intended Audience :: Developers',
                'Programming Language :: Python',
                'Topic :: Software Development',
